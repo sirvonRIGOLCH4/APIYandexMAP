@@ -35,11 +35,13 @@ size = width, height
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('APIYandexMAP')
 picture = pygame.image.load('map.png')
+# Удаляем за собой файл с изображением.
+os.remove('map.png')
 
 running = True
 while running:
     # Рисуем картинку, загружаемую из только что созданного файла.
-    screen.blit(pygame.image.load(map_file), (0, 0))
+    screen.blit(picture, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -47,5 +49,4 @@ while running:
     pygame.display.flip()
 pygame.quit()
 
-# Удаляем за собой файл с изображением.
-os.remove(map_file)
+
