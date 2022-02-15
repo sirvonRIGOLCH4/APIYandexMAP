@@ -8,7 +8,6 @@ coords = [40.403477, 56.144662]
 
 
 def show_map():
-    global picture
     maps_server = 'http://static-maps.yandex.ru/1.x/'
 
     map_params = {
@@ -32,6 +31,8 @@ def show_map():
     # Удаляем за собой файл с изображением.
     os.remove('map.png')
 
+    return picture
+
 
 def change_zoom(flag, coeff):
     spn2 = coeff
@@ -44,12 +45,13 @@ def change_zoom(flag, coeff):
 
 # Инициализируем pygame
 pygame.init()
-show_map()
 width = 600
 height = 450
 size = width, height
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('APIYandexMAP')
+
+picture = show_map()
 
 running = True
 while running:
@@ -61,10 +63,10 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_PAGEUP:
                 spn = change_zoom(True, spn)
-                show_map()
+                picture = show_map()
             elif event.key == pygame.K_PAGEDOWN:
                 spn = change_zoom(False, spn)
-                show_map()
+                picture = show_map()
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
 pygame.quit()
