@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>619</width>
-    <height>606</height>
+    <height>633</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>110</y>
+      <y>130</y>
       <width>600</width>
       <height>450</height>
      </rect>
@@ -34,7 +34,7 @@
     <property name="geometry">
      <rect>
       <x>540</x>
-      <y>560</y>
+      <y>590</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -98,7 +98,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
+      <y>80</y>
       <width>381</width>
       <height>16</height>
      </rect>
@@ -119,8 +119,8 @@
      <rect>
       <x>399</x>
       <y>10</y>
-      <width>211</width>
-      <height>83</height>
+      <width>212</width>
+      <height>112</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -146,6 +146,19 @@
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QCheckBox" name="checkBox">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>10</y>
+      <width>210</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Вывод почтового индекса</string>
+    </property>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

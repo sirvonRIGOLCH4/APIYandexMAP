@@ -80,3 +80,35 @@ def adres(address):
         return None
 
     return toponym_adress
+
+
+def post(address):
+    # Собираем запрос для геокодера.
+    geocoder_params = {
+        "apikey": API_KEY,
+        "geocode": address,
+        "format": "json"}
+
+    # Выполняем запрос.
+    response = requests.get(geocoder_SERVICE, params=geocoder_params)
+
+    if response:
+        # Преобразуем ответ в json-объект
+        json_response = response.json()
+    else:
+        print("Ошибка выполнения запроса:")
+        print(geocoder_SERVICE)
+        print("Http статус:", response.status_code, "(", response.reason, ")")
+
+    # Получаем первый топоним из ответа геокодера.
+    # Согласно описанию ответа он находится по следующему пути:
+    toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+    toponym_adress = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+
+    if not toponym:
+        return None
+
+    try:
+        return toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]["postal_code"] + ", " + toponym_adress
+    except KeyError:
+        return toponym_adress
