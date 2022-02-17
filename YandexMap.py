@@ -74,4 +74,4 @@ class Ui_MainWindow(object):
         self.pushButton_2.setText(_translate("MainWindow", "Вид"))
         self.pushButton.setText(_translate("MainWindow", "Поиск по координатам"))
         self.pushButton_3.setText(_translate("MainWindow", "Поиск по адресу"))
-        self.pushButton_4.setText(_translate("MainWindow", "Сброс результатов поиска"))
+        self.pushButton_4.setText(_translate("MainWindow", "Сброс поискового результата"))

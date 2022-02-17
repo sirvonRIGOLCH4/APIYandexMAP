@@ -134,7 +134,7 @@
      <item>
       <widget class="QPushButton" name="pushButton_4">
        <property name="text">
-        <string>Сброс результатов поиска</string>
+        <string>Сброс поискового результата</string>
        </property>
       </widget>
      </item>
