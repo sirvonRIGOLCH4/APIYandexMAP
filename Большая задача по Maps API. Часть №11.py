@@ -1,3 +1,4 @@
+import math
 import os
 import sys
 import requests
@@ -24,7 +25,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.coords.append(self.lot)
         self.coords.append(self.lan)
         self.type_map = 'map'
-        self.spn = [0.05, 0.05]
+        self.zoom = 12
+
+        self.spisok = []
 
         self.flag_metka = False
         self.metka_coord = []
@@ -34,26 +37,63 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pixmap = QPixmap(self.map_file)
         self.label.setPixmap(self.pixmap)
 
-      #  self.lineEdit.hide()
-        self.label.focusWidget()
-
         self.pushButton.clicked.connect(self.search_coord)
         self.pushButton_2.clicked.connect(self.type)
         self.pushButton_3.clicked.connect(self.search_adress)
         self.pushButton_4.clicked.connect(self.reset_map)
         self.checkBox.stateChanged.connect(self.search_adress)
 
+        self.setFocus()
+        self.label.installEventFilter(self)
+
+    def setFocus(self):
+        self.setFocusPolicy(Qt.StrongFocus)
+
+    def eventFilter(self, object, event):
+        if object == self.label and event.type() == 2:
+            mouse = list(map(float, str(event.pos()).split('(')[1][:-1].split(',')))
+            self.clickMouse(mouse)
+        return super(QMainWindow, self).eventFilter(object, event)
+
+    def clickMouse(self, coords_mouse):
+        self.delta_x = coords_mouse[0] - 300
+        self.delta_y = 225 - coords_mouse[1]
+        self.lot_temp = self.coords[0] + self.delta_x * 0.0000428 * math.pow(2, 15 - self.zoom)
+        self.lan_temp = self.coords[1] + self.delta_y * 0.0000428 * math.cos(math.radians(self.coords[1])) * math.pow(2, 15 - self.zoom)
+
+        self.spisok.clear()
+        self.spisok.append(str(self.lot_temp))
+        self.spisok.append(str(self.lan_temp))
+
+        self.doubleSpinBox.setValue(float(self.spisok[0]))
+        self.doubleSpinBox_2.setValue(float(self.spisok[1]))
+
+        self.zapros = ','.join(self.spisok)
+        self.lineEdit.setText(str(self.zapros))
+
+        self.coords.clear()
+        self.coords.append(self.lot_temp)
+        self.coords.append(self.lan_temp)
+        self.draw_map_2()
+
+        self.search_adress()
+
     def draw_map(self):
+        self.metka_coord = self.coords
         self.show_map()
         self.pixmap.load('map.png')
         self.label.setPixmap(self.pixmap)
 
     def draw_map_2(self):
+        self.metka_coord = self.coords
         self.show_map_2()
         self.pixmap.load('map.png')
         self.label.setPixmap(self.pixmap)
 
     def reset_map(self):
+        self.coords = [40.403477, 56.144662]
+        self.zoom = 12
+        self.lineEdit.clear()
         self.flag_metka = False
         self.label_2.setText('')
         self.draw_map()
@@ -65,7 +105,6 @@ class Window(QMainWindow, Ui_MainWindow):
            self.type_map = "skl"
        elif self.type_map == "skl":
            self.type_map = "map"
-
        self.draw_map()
 
     def search_coord(self):
@@ -85,9 +124,45 @@ class Window(QMainWindow, Ui_MainWindow):
             else:
                 self.adres = geospn.adres(self.adress)
             self.label_2.setText(self.adres)
+        else:
+            self.lot = str(self.doubleSpinBox.value())
+            self.lan = str(self.doubleSpinBox_2.value())
+            self.spisok.clear()
+            self.spisok.append(self.lot)
+            self.spisok.append(self.lan)
+            self.zapros2 = ','.join(self.spisok)
+            if self.checkBox.isChecked():
+                self.zapros2 = geospn.post(str(self.zapros2))
+            else:
+                self.zapros2 = geospn.adres(str(self.zapros2))
+            self.label_2.setText(self.zapros2)
+
         self.metka_coord = self.coords
         self.flag_metka = True
         self.draw_map_2()
+
+    def show_map(self):
+        maps_server = 'http://static-maps.yandex.ru/1.x/'
+
+        map_params = {
+            'll': str(self.coords[0]) + ',' + str(self.coords[1]),
+            'z': self.zoom,
+            'l': self.type_map}
+
+        response = requests.get(maps_server, params=map_params)
+
+        if not response:
+            print("Ошибка выполнения запроса:")
+            print("Http статус:", response.status_code, "(", response.reason, ")")
+            sys.exit(1)
+
+        self.map_file = "map.png"
+        with open(self.map_file, "wb") as file:
+            file.write(response.content)
+
+        self.lineEdit.clear()
+        self.doubleSpinBox.setValue(float(self.coords[0]))
+        self.doubleSpinBox_2.setValue(float(self.coords[1]))
 
     def show_map_2(self):
         maps_server = 'http://static-maps.yandex.ru/1.x/'
@@ -97,7 +172,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         map_params = {
             'll': f"{ll}",
-            'spn': str(self.spn[0]) + ',' + str(self.spn[1]),
+            'z': self.zoom,
             'l': self.type_map,
             "pt": f"{metka},pm2dgl"}
 
@@ -113,52 +188,27 @@ class Window(QMainWindow, Ui_MainWindow):
         with open(self.map_file, "wb") as file:
             file.write(response.content)
 
-    def show_map(self):
-        maps_server = 'http://static-maps.yandex.ru/1.x/'
-
-        map_params = {
-            'll': str(self.coords[0]) + ',' + str(self.coords[1]),
-            'spn': str(self.spn[0]) + ',' + str(self.spn[1]),
-            'l': self.type_map}
-
-        response = requests.get(maps_server, params=map_params)
-
-        if not response:
-            print("Ошибка выполнения запроса:")
-            print("Http статус:", response.status_code, "(", response.reason, ")")
-            sys.exit(1)
-
-        # Запишем полученное изображение в файл.
-        self.map_file = "map.png"
-        with open(self.map_file, "wb") as file:
-            file.write(response.content)
-
-    def change_zoom(self, flag, coeff):
-        spn2 = coeff
-        if flag:
-            spn2 = [spn2[0] * 2, spn2[1] * 2]
-        else:
-            spn2 = [spn2[0] / 2, spn2[1] / 2]
-        return spn2
+        self.lineEdit.clear()
+        self.doubleSpinBox.setValue(float(self.coords[0]))
+        self.doubleSpinBox_2.setValue(float(self.coords[1]))
 
     def closeEvent(self, event):
         os.remove(self.map_file)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_PageUp:
-            self.spn = self.change_zoom(True, self.spn)
+        if event.key() == Qt.Key_PageUp and self.zoom < 18:
+            self.zoom += 1
             if self.flag_metka:
                 self.draw_map_2()
             else:
                 self.draw_map()
 
-        elif event.key() == Qt.Key_PageDown:
-            self.spn = self.change_zoom(False, self.spn)
+        elif event.key() == Qt.Key_PageDown and self.zoom > 2:
+            self.zoom -= 1
             if self.flag_metka:
                 self.draw_map_2()
             else:
                 self.draw_map()
-
 
         elif event.key() == Qt.Key_W:
             self.coords = [self.coords[0], self.coords[1] + 0.05]
