@@ -149,29 +149,28 @@ class Window(QMainWindow, Ui_MainWindow):
             if self.flag_metka:
                 self.draw_map_2()
             else:
-                self.self.draw_map()
+                self.draw_map()
 
         elif event.key() == Qt.Key_PageDown:
             self.spn = self.change_zoom(False, self.spn)
             if self.flag_metka:
                 self.draw_map_2()
             else:
-                self.self.draw_map()
-
+                self.draw_map()
 
         elif event.key() == Qt.Key_W:
             self.coords = [self.coords[0], self.coords[1] + 0.05]
             if self.flag_metka:
                 self.draw_map_2()
             else:
-                self.self.draw_map()
+                self.draw_map()
 
         elif event.key() == Qt.Key_S:
             self.coords = [self.coords[0], self.coords[1] - 0.05]
             if self.flag_metka:
                 self.draw_map_2()
             else:
-                self.self.draw_map()
+                self.draw_map()
 
         elif event.key() == Qt.Key_A:
             self.coords = [self.coords[0] - 0.05, self.coords[1]]
@@ -185,7 +184,7 @@ class Window(QMainWindow, Ui_MainWindow):
             if self.flag_metka:
                 self.draw_map_2()
             else:
-                self.self.draw_map()
+                self.draw_map()
 
 
 if __name__ == '__main__':
