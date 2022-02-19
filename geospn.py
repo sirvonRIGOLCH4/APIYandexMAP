@@ -1,12 +1,36 @@
+import math
+
 import requests
 from dotenv import load_dotenv
 from os import environ  # для чтения переменных среды окружения
 
 load_dotenv("env")  # берем свой файл
 #print(environ["API_KEY"])  # проверяем доступ к ключу
-#static_maps_SERVICE = 'https://static-maps.yandex.ru/1.x/'
+static_maps_SERVICE = 'https://static-maps.yandex.ru/1.x/'
+search_api_server = f"https://search-maps.yandex.ru/v1/"
 geocoder_SERVICE = f"http://geocode-maps.yandex.ru/1.x/"
 API_KEY = environ["API_KEY"]
+API_KEY_2 = environ["API_KEY_2"]
+
+
+# Определяем функцию, считающую расстояние между двумя точками, заданными координатами
+def lonlat_distance(a, b):
+    degree_to_meters_factor = 111 * 1000  # 111 километров в метрах
+    a_lon, a_lat = a
+    b_lon, b_lat = b
+
+    # Берем среднюю по широте точку и считаем коэффициент для нее.
+    radians_lattitude = math.radians((a_lat + b_lat) / 2.)
+    lat_lon_factor = math.cos(radians_lattitude)
+
+    # Вычисляем смещения в метрах по вертикали и горизонтали.
+    dx = abs(a_lon - b_lon) * degree_to_meters_factor * lat_lon_factor
+    dy = abs(a_lat - b_lat) * degree_to_meters_factor
+
+    # Вычисляем расстояние между точками.
+    distance = math.sqrt(dx * dx + dy * dy)
+
+    return round(distance)
 
 
 # Получаем параметры объекта для рисования карты вокруг него.
@@ -51,6 +75,31 @@ def llspan(address):
     spn = f"{delta_x},{delta_y}"
 
     return float(toponym_lon), float(toponym_lat)
+
+
+def find_org(coords):
+    search_params = {
+        "apikey": API_KEY_2,
+        "lang": "ru_RU",
+        "ll": coords,
+        "spn": "0.001,0.001",
+        "type": "biz",
+        "text": "а"
+    }
+
+    response = requests.get(search_api_server, params=search_params)
+
+    if response:
+        # Преобразуем ответ в json-объект
+        json_response = response.json()
+    else:
+        print("Ошибка выполнения запроса:")
+        print(search_api_server)
+        print("Http статус:", response.status_code, "(", response.reason, ")")
+
+    # Получаем первую найденную организацию.
+    organizations = json_response["features"]
+    return organizations[0] if organizations else None
 
 
 def adres(address):
